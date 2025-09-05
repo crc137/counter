@@ -1,8 +1,7 @@
-name: Counter Robot
-
+name: Count Every 30 Minutes
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
     inputs:
       logLevel:
@@ -20,33 +19,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Load Counter and Increment
-        id: setup-counter
-        run: |
-          COUNTER_FILE="counter.txt"
+    - name: Load Counter and Increment
+      id: setup-counter
+      run: |
+        if [ ! -f counter.txt ]; then
+          echo "0" > counter.txt
+        fi
+        counter=$(cat counter.txt)
 
-          if [ ! -f "$COUNTER_FILE" ]; then
-            echo "0" > "$COUNTER_FILE"
-          fi
+        counter=$((counter + 1))
+        echo "Counter value incremented to: $counter"
 
-          counter=$(cat "$COUNTER_FILE")
-          counter=$((counter + 1))
-          echo "$counter" > "$COUNTER_FILE"
-          echo "Counter incremented to $counter"
-          echo "counter=$counter" >> "$GITHUB_OUTPUT"
+        echo "$counter" > counter.txt
 
-      - name: Commit and Push Changes
-        run: |
-          git config --global user.email "${{ secrets.GIT_EMAIL }}"
-          git config --global user.name "${{ secrets.GIT_NAME }}"
+      env:
+        GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
 
-          if git diff --quiet; then
-            echo "No changes to commit."
-          else
-            git add counter.txt
-            git commit -m "🤖 Robot: Counter incremented to ${{ steps.setup-counter.outputs.counter }}"
-            git push "https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git"
-          fi
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.email "${{ secrets.GIT_EMAIL }}"
+        git config --global user.name "${{ secrets.GIT_NAME }}"
+        git pull
+        git add counter.txt
+        git commit -m "Updated counter to ${{ steps.setup-counter.outputs.counter }}"
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+        GIT_NAME: ${{ secrets.GIT_NAME }}
