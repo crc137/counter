@@ -29,7 +29,6 @@ jobs:
         if [ ! -f counter.txt ]; then
           echo "0" > counter.txt
         fi
-
         counter=$(cat counter.txt)
         counter=$((counter + 1))
         echo "Counter value incremented to: $counter"
@@ -40,9 +39,9 @@ jobs:
       run: |
         git config --global user.name "crc137"
         git config --global user.email "admin@coonlink.com"
-        git pull
+        git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}
         git add counter.txt
-        git commit -m "Updated counter to ${{ steps.setup-counter.outputs.counter }}"
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git commit -m "Updated counter to ${{ steps.setup-counter.outputs.counter }}" || echo "No changes to commit"
+        git push
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_PAT: ${{ secrets.GH_PAT }}
