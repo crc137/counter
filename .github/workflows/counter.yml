@@ -44,7 +44,7 @@ jobs:
         git config --global user.name "admin@coonlink.com"
         git pull
         git add counter.txt
-        git commit -m "Updated counter to $(( $(cat counter.txt) ))"
+        git commit -m "Updated counter to ${{ steps.setup-counter.outputs.counter }}"
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
