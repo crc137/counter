@@ -40,8 +40,8 @@ jobs:
 
     - name: Commit and Push Changes
       run: |
-        git config --global user.email "${{ secrets.GIT_EMAIL }}"
-        git config --global user.name "${{ secrets.GIT_NAME }}"
+        git config --global user.name "crc137"
+        git config --global user.name "admin@coonlink.com"
         git pull
         git add counter.txt
         git commit -m "Updated counter to ${{ steps.setup-counter.outputs.counter }}"
